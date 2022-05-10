@@ -50,12 +50,6 @@ const getUser = async(req, res, next) => {
     }
 };
 
-module.exports = {
-    getAllUsers,
-    getUser,
-};
-
-
 const deleteContact = async(req, res, next) => {
     try {
         const {user, contact} = req.body;
@@ -118,6 +112,8 @@ const deleteChat = async(req, res, next) => {
 
 
 module.exports = {
+    getAllUsers,
+    getUser ,
     deleteContact,
     deleteChat,
 };
