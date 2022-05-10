@@ -50,6 +50,111 @@ const getUser = async(req, res, next) => {
     }
 };
 
+const postUser = async(req, res, next) => {
+    try {
+        const {phone, country, name} = req.body;
+
+        const result = await WA.create({
+            phone: phone,
+            country: {
+                name: country.name,
+                code: country.code,
+            },
+            name: name,
+        });
+
+        res.send({
+            status: 'success',
+            message: "Success inserting new user.",
+            desc: result,
+        });
+    }
+    catch(e) {
+        res.send({
+            status: 'error',
+            message: "Error inserting new user.",
+            desc: e.message,
+        });
+    }
+};
+
+const postMessage = async(req, res, next) => {
+    try {
+        const {sender, receiver, message} = req.body;
+        
+        const senderDataGet = await WA.find({_id: ObjectID(sender)});
+
+        let senderIndex = null;
+        senderDataGet[0].contacts.forEach((r, i) => {
+            if(receiver === r._id.toString()) {
+                senderIndex = i;
+            }
+        });
+
+        let senderDataGetTemp = senderDataGet[0].contacts;
+        const senderUpdate = {
+            type: 'send',
+            date: new Date(),
+            read: false,
+            msg: message,
+        };
+        if(senderDataGetTemp[senderIndex].chats === null) {
+            senderDataGetTemp[senderIndex].chats = [senderUpdate];
+        }
+        else {
+            senderDataGetTemp[senderIndex].chats.push(senderUpdate);
+        }
+
+        const senderDataUpdate = await WA.updateOne({_id: ObjectID(sender)}, {$set: {
+            contacts: senderDataGetTemp,
+        }});
+
+        const receiverDataGet = await WA.find({_id: ObjectID(receiver)});
+
+        let receiverIndex = null;
+        receiverDataGet[0].contacts.forEach((r, i) => {
+            if(sender === r._id.toString()) {
+                receiverIndex = i;
+            }
+        });
+        
+        let receiverDataGetTemp = receiverDataGet[0].contacts;
+        const receiverUpdate = {
+            type: 'receive',
+            date: new Date(),
+            read: false,
+            msg: message,
+        };
+        if(receiverDataGetTemp[receiverIndex].chats === null) {
+            receiverDataGetTemp[receiverIndex].chats = [receiverUpdate];
+        }
+        else {
+            receiverDataGetTemp[receiverIndex].chats.push(receiverUpdate);
+        }
+
+        const receiverDataUpdate = await WA.updateOne({_id: ObjectID(receiver)}, {$set: {
+            contacts: receiverDataGetTemp,
+        }});
+
+        
+        res.send({
+            status: 'success',
+            message: "Success saving message",
+            desc: {
+                sender: senderDataUpdate,
+                receiver: receiverDataUpdate,
+            },
+        })
+    }
+    catch(e) {
+        res.send({
+            status: 'error',
+            message: "Error saving message",
+            desc: e.message,
+        });
+    }
+};
+
 const deleteContact = async(req, res, next) => {
     try {
         const {user, contact} = req.body;
@@ -161,8 +266,11 @@ const putUserAbout = async(req, res, next) => {
 module.exports = {
     getAllUsers,
     getUser ,
+    postUser,
+    postMessage,
     deleteContact,
     deleteChat,
     putUserName,
     putUserAbout,
+    
 };
