@@ -261,7 +261,89 @@ const putUserAbout = async(req, res, next) => {
     }
 };
 
+const postUserAddAccount = async(req, res, next) => {
+    try {
+        const {name, phone, contacts} = req.body;
 
+        let user = null;
+        const allUsers = await WA.find();
+        allUsers.forEach(r => {
+            if(r.phone === phone && r.phone) {
+                user = r;
+            }
+        });
+
+        if(user === null) {
+            res.send({
+                status: 'error',
+                message: "Unable to add new contact",
+                desc: "Phone number does not exist.",
+            });
+        }
+        else {
+            let exist = false;
+            (contacts.length > 0) && contacts.forEach(r => {
+                if(r.phone === phone) {
+                    exist = true;
+                    res.send({
+                        status: 'error',
+                        message: "Unable to add new contact",
+                        desc: "Contact already exist.",
+                    });
+                }
+            });
+
+            if(exist === false || contacts.length === 0) {
+                contacts.push({
+                    _id: user._id,
+                    contactName: name,
+                    chats: null,
+                });
+
+                const result = await WA.updateOne(req.query, {$set: {
+                    contacts: contacts,
+                }});
+                
+                res.send({
+                    status: 'success',
+                    message: "New contact successfully added.",
+                    desc: result,
+                });
+            }
+        }
+    }
+    catch(e) {
+        res.send({
+            status: 'error',
+            message: "Error adding new contact to user",
+            desc: e.message,
+        });
+    }
+};
+
+const putUserPicture = async(req, res, next) => {
+    try {
+        const {_id} = req.query;
+        const {uri} = req.body;
+
+        const result = await WA.updateOne({_id: _id}, {$set: {
+            picture: uri,
+        }});
+
+        res.send({
+            status: 'success',
+            message: "User's profile picture updated successfully.",
+            desc: result,
+        });
+    }
+    catch(e) {
+        res.send({
+            status: 'error',
+            message: "Unable to save user's profile picture.",
+            desc: e.message,
+        });
+    }
+};
 
 module.exports = {
     getAllUsers,
@@ -272,5 +354,6 @@ module.exports = {
     deleteChat,
     putUserName,
     putUserAbout,
-    
+    postUserAddAccount,
+    putUserPicture,
 };
