@@ -110,10 +110,59 @@ const deleteChat = async(req, res, next) => {
     }
 }
 
+const putUserName = async(req, res, next) => {
+    try {
+        const {name} = req.body;
+
+        const result = await WA.updateOne(req.query, {$set: {
+            name: name,
+        }});
+
+        res.send({
+            status: 'success',
+            message: "User's name updated successfully",
+            desc: result,
+        });
+    }
+    catch(e) {
+        res.send({
+            status: 'error',
+            message: "Unable to save user's name.",
+            desc: e.message,
+        });
+    }
+};
+
+const putUserAbout = async(req, res, next) => {
+    try {
+        const {about} = req.body;
+
+        const result = await WA.updateOne(req.query, {$set: {
+            about: about,
+        }});
+
+        res.send({
+            status: 'success',
+            message: "User's about updated successfully.",
+            desc: result,
+        });
+    }
+    catch(e) {
+        res.send({
+            status: 'error',
+            message: "Unable to save user's about.",
+            desc: e.message,
+        });
+    }
+};
+
+
 
 module.exports = {
     getAllUsers,
     getUser ,
     deleteContact,
     deleteChat,
+    putUserName,
+    putUserAbout,
 };
