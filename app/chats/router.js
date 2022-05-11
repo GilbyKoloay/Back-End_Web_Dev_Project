@@ -22,7 +22,7 @@ router.delete('/user/deleteContact', deleteContact);
 router.delete('/user/clearChat', deleteChat);
 router.put('/user/name', putUserName);
 router.put('/user/about', putUserAbout);
-router.post('user/addaccount', postUserAddAccount);
-router.put('user/picture', putUserPicture);
+router.post('/user/addaccount', postUserAddAccount);
+router.put('/user/picture', putUserPicture);
 
 module.exports = router;
