@@ -14,8 +14,8 @@ const {
 
 router.get('/users', getAllUsers);
 router.get('/user', getUser);
-router.get('/user', postUser);
-router.get('/user', postMessage);
+router.post('/user', postUser);
+router.post('/user', postMessage);
 router.delete('/user/deleteContact', deleteContact);
 router.delete('/user/clearChat', deleteChat);
 router.put('/user/name', putUserName);
